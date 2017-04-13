@@ -1,0 +1,6 @@
+c:\users\matt\documents\visual studio 2015\Projects\Mnemosyne\Mnemosyne\bin\Debug\Mnemosyne.exe.config
+c:\users\matt\documents\visual studio 2015\Projects\Mnemosyne\Mnemosyne\bin\Debug\Mnemosyne.exe
+c:\users\matt\documents\visual studio 2015\Projects\Mnemosyne\Mnemosyne\bin\Debug\Mnemosyne.pdb
+c:\users\matt\documents\visual studio 2015\Projects\Mnemosyne\Mnemosyne\obj\Debug\Mnemosyne.csprojResolveAssemblyReference.cache
+c:\users\matt\documents\visual studio 2015\Projects\Mnemosyne\Mnemosyne\obj\Debug\Mnemosyne.exe
+c:\users\matt\documents\visual studio 2015\Projects\Mnemosyne\Mnemosyne\obj\Debug\Mnemosyne.pdb
