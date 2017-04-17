@@ -1,9 +1,0 @@
-C:\Users\matt\Desktop\memscan\memscrape\MemoryScanner\bin\Debug\MemoryScanner.exe.config
-C:\Users\matt\Desktop\memscan\memscrape\MemoryScanner\bin\Debug\MemoryScanner.exe
-C:\Users\matt\Desktop\memscan\memscrape\MemoryScanner\bin\Debug\MemoryScanner.pdb
-C:\Users\matt\Desktop\memscan\memscrape\MemoryScanner\obj\x86\Debug\MemoryScanner.csprojResolveAssemblyReference.cache
-C:\Users\matt\Desktop\memscan\memscrape\MemoryScanner\obj\x86\Debug\MemoryScanner.exe
-C:\Users\matt\Desktop\memscan\memscrape\MemoryScanner\obj\x86\Debug\MemoryScanner.pdb
-C:\Users\matt\Desktop\Desktop\memscan\memscrape\MemoryScanner\bin\Debug\MemoryScanner.exe.config
-C:\Users\matt\Desktop\Desktop\memscan\memscrape\MemoryScanner\obj\x86\Debug\MemoryScanner.exe
-C:\Users\matt\Desktop\Desktop\memscan\memscrape\MemoryScanner\obj\x86\Debug\MemoryScanner.pdb
