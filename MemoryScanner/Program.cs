@@ -1,14 +1,24 @@
-﻿// Mnemosyne - A Memory Scraper
-//
-// Written by Matt Lewis, NCC Group 2017
-// Synopsis - scans a process memory space for a search string (unicode and ascii)
-// then if found, spits these out either to stdout, a file or a socket to a remote listener
-//
-// Useful for memory scraping a process, a post-exploitation POC, an analysis mechanism for malware  or 
-// an instrumentation tool to be used during fuzzing
-//
-// Code adapted from http://www.codeproject.com/Articles/716227/Csharp-How-to-Scan-a-Process-Memory
-// Original code licensed under CPOL: http://www.codeproject.com/info/cpol10.aspx
+/*
+Released as open source by NCC Group Plc - http://www.nccgroup.com/
+
+Developed by Matt Lewis, matt dot lewis at nccgroup dot trust
+
+https://github.com/nccgroup/mnemosyne
+
+Released under AGPL see LICENSE for more information
+
+Mnemosyne - A Memory Scraper
+
+Written by Matt Lewis, NCC Group 2017
+Synopsis - scans a process memory space for a search string (unicode and ascii)
+then if found, spits these out either to stdout, a file or a socket to a remote listener
+
+Useful for memory scraping a process, a post-exploitation POC, an analysis mechanism for malware  or 
+an instrumentation tool to be used during fuzzing
+
+Code adapted from http://www.codeproject.com/Articles/716227/Csharp-How-to-Scan-a-Process-Memory
+Original code licensed under CPOL: http://www.codeproject.com/info/cpol10.aspx
+*/
 
 using System;
 using System.Net;
