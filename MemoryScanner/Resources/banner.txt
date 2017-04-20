@@ -1,0 +1,24 @@
+ ___ ___  ____     ___  ___ ___   ___   _____ __ __  ____     ___ 
+|   |   ||    \\   /  _]|   |   | /   \\ / ___/|  |  ||    \\   /  _]
+| _   _ ||  _  | /  [_ | _   _ ||     (   \\_ |  |  ||  _  | /  [_ 
+|  \\_/  ||  |  ||    _]|  \\_/  ||  O  |\\__  ||  ~  ||  |  ||    _]
+|   |   ||  |  ||   [_ |   |   ||     |/  \\ ||___, ||  |  ||   [_ 
+|   |   ||  |  ||     ||   |   ||     |\\    ||     ||  |  ||     |
+|___|___||__|__||_____||___|___| \\___/  \\___||____/ |__|__||_____| v1.0
+
+---- Written by Matt Lewis, NCC Group 2017 ----\n
+
+Usage: mnemosyne -run -s <pid>|-proc-hop <Remote IP> <Remote Port> <delay> <width> <search term>
+                 -run -f <pid>|-proc-hop <filename> <delay> <width> <search term>
+                 -run -o <pid>|-proc-hop <delay> <width> <search term>
+                 -proclist\n\n
+Flag Definitions:
+-s\t\twrite output to socket
+-f\t\twrite output to a file
+-o\t\twrite output to terminal
+<pid>\t\tprocess id to scan
+-proc-hop\tdo a one-time scan across all accessible processes
+delay\t\ttime to wait between each memory chunk scan
+width\t\tamount of data (in bytes) to display before and after search term
+search term\tstring to look for in memory (spaces allowed)
+\t\tPrepend search strings with ~R for regular expressions, e.g. ~R\\d{3}-\\d{3}
