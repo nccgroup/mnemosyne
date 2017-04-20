@@ -107,4 +107,7 @@
   <data name="SearchStartMessageForStandardIO" xml:space="preserve">
     <value>Starting search for "{0}" and sending output to stdio with delay of {1} and width of {2}</value>
   </data>
+  <data name="ProcessIdMessage" xml:space="preserve">
+    <value>Working on processID {0} : {1}</value>
+  </data>
 </root>

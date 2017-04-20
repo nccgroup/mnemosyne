@@ -107,4 +107,7 @@
   <data name="OutOfBoundsError" xml:space="preserve">
     <value>Out of bounds exception - width too large.</value>
   </data>
+  <data name="SocketExceptionError" xml:space="preserve">
+    <value>SocketException : {0}</value>
+  </data>
 </root>

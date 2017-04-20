@@ -86,5 +86,14 @@ namespace MemoryScanner.Resources {
                 return ResourceManager.GetString("OutOfBoundsError", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SocketException : {0}.
+        /// </summary>
+        internal static string SocketExceptionError {
+            get {
+                return ResourceManager.GetString("SocketExceptionError", resourceCulture);
+            }
+        }
     }
 }

@@ -61,6 +61,15 @@ namespace MemoryScanner.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Working on processID {0} : {1}.
+        /// </summary>
+        internal static string ProcessIdMessage {
+            get {
+                return ResourceManager.GetString("ProcessIdMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Starting search for &quot;{0}&quot; and sending output to file {1} with delay of {2} and width of {3}.
         /// </summary>
         internal static string SearchStartMessageForFile {
